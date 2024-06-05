@@ -1,6 +1,6 @@
-# Open Source Data Analytics Platform - Docker Modern Data stack
+# Open Source Data Analytics Platform
 
-This Repo is a guide to setting up a modern data stack all in Ubuntu on docker with just a few commands!
+This Repo is a guide to setting up a Data Analytics Platform in Ubuntu using Open Source Software and Docker!
 
 ![Open Source Data Analytics Platform ](https://github.com/DataCraftsmanAU/moderndatastack/blob/main/Open%20Source%20Data%20Analytics%20Platform.png)
 
@@ -8,6 +8,7 @@ This Repo is a guide to setting up a modern data stack all in Ubuntu on docker w
 Setting up using TLS and certificates adds a massive complexity to the install however it is possible. Generally you need to get some certificates made up for your server, put them someone safe in your home drive, then mount them to various locations on each application using -v /directory:/app/cert/dir and usually an -e TLSOPTION=true type environment variable.
 
 
+## Docker Modern Data stack
 ## Installation
 
 Most of the content below are direct commands to run in the linux terminal. Just check each one before you run them in case there are passwords to enter or something.
