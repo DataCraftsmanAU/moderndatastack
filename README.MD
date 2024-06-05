@@ -47,7 +47,7 @@ You'll need somewhere to store your keys for all your apps. I recommend using Ke
 ```
 docker run -d --name=keepassxc --security-opt seccomp=unconfined -e PUID=1000 -e PGID=1000 -e TZ=Etc/UTC -p 3000:3000 -p 3001:3001 -v keepass_data:/config --restart unless-stopped lscr.io/linuxserver/keepassxc:latest
 ```
-localhost:3000
+http://localhost:3000
 
 Create a database, follow the prompts.
 Create a new group under Root and then you can click 'Add a New Entry' to generate and store passwords for your team to use as admin accounts for all the applications we are going to deploy.
@@ -163,7 +163,7 @@ docker run -d --name postgres-warehouse -e POSTGRES_USER=<username> -e POSTGRES_
 docker run -d --name pgadmin -e 'PGADMIN_DEFAULT_EMAIL=<emailaddress>' -e 'PGADMIN_DEFAULT_PASSWORD=<password>' -e 'PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION=True' -e 'PGADMIN_CONFIG_LOGIN_BANNER="Authorised users only!"' -e 'PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10' -v pgadmin_data:/var/lib/pgadmin -p 31280:80 dpage/pgadmin4:8.7
 ```
 
-Login at localhost:31280, usually takes a minute to boot. 
+Login at http://localhost:31280, usually takes a minute to boot. 
 Register your new postgres server to the pgadmin server list.
 
 
@@ -180,7 +180,7 @@ cd airbyte
 ```
 nohup ./run-ab-platform.sh >> nohup.out &
 ```
-localhost:8000
+http://localhost:8000
 Default account = airbyte / password
 Create an account with Email and Company
 
