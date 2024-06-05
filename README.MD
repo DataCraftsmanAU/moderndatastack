@@ -11,10 +11,12 @@ Setting up using TLS and certificates adds a massive complexity to the install h
 ## Docker Modern Data stack
 ## Installation
 
-Most of the content below are direct commands to run in the linux terminal. Just check each one before you run them in case there are passwords to enter or something.
+Most of the content below are direct commands to run in the linux terminal. Just check each one before you run them in case there are passwords to enter or something. Also where ever you see `localhost`, usually I mean to use your VMs address. E.G. `192.168.1.X` or `yourvmdomain.com`
 
+Make your life easier:
+```
 sudo sudo su
-
+```
 ### Installing Docker
 ```
 for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done
@@ -58,7 +60,7 @@ Create a new group under Root and then you can click 'Add a New Entry' to genera
 ```
 docker run -d -p 38000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:sts
 ```
-Go to hostname:9443 in your browser and create a portainer admin account.
+Go to http://localhost:9443 in your browser and create a portainer admin account.
 
 Go to environments and update the local details to your servers hostname in the Public IP field. This allows you to shell into your containers from the containers menu.
 
@@ -73,8 +75,7 @@ docker run --entrypoint htpasswd httpd:2 -Bbn <USERNAME> <PASSWORD> > auth/htpas
 ```
 docker run -d -p 5000:5000 --restart always -v registry_data:/var/lib/registry --name registry -v "$(pwd)"/auth:/auth -e "REGISTRY_AUTH=htpasswd" -e "REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm" -e REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd registry:2.8.3
 ```
-Test your account by doing
-docker login localhost:5000 then enter the username and password you made.
+Test your account by doing ```docker login localhost:5000``` then enter the username and password you made.
 
 
 
@@ -86,10 +87,10 @@ docker run -d -p 9000:9000 -p 9001:9001 --user $(id -u):$(id -g) --name minio -e
 If you have an old cpu, find an image that has cpuv1 in the tag such as:
 quay.io/minio/minio:RELEASE.2024-06-04T19-20-08Z-cpuv1
 
-Use port 9001 for Web UI
+Use http://localhost:9001 for Web UI
 Create a bucket in Object Browser
 Create an Access Key
-Use port 9000 with no TLS for S3 browser.
+Use http://localhost:9000 for as your S3 Host address.
 
 
 ### Install Airflow
@@ -140,6 +141,7 @@ docker compose build
 docker compose up airflow-init
 docker compose up -d
 ```
+http://localhost:8080
 Default account is airflow / airflow if you didn't change in .env
 
 #### To upgrade Airflow
@@ -158,6 +160,8 @@ docker compose down --volumes --rmi all
 ```
 docker run -d --name postgres-warehouse -e POSTGRES_USER=<username> -e POSTGRES_PASSWORD=<password> -e PGDATA=/var/lib/postgresql/data/pgdata -v postgres_data:/var/lib/postgresql/data -p 31250:5432 postgres:16.3
 ```
+
+
 #### Install pgadmin
 ```
 docker run -d --name pgadmin -e 'PGADMIN_DEFAULT_EMAIL=<emailaddress>' -e 'PGADMIN_DEFAULT_PASSWORD=<password>' -e 'PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION=True' -e 'PGADMIN_CONFIG_LOGIN_BANNER="Authorised users only!"' -e 'PGADMIN_CONFIG_CONSOLE_LOG_LEVEL=10' -v pgadmin_data:/var/lib/pgadmin -p 31280:80 dpage/pgadmin4:8.7
