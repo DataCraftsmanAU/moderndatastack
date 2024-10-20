@@ -1,16 +1,15 @@
-# Open Source Data Analytics Platform
+# Open Data Platform
 
-This Repo is a guide to setting up a Data Analytics Platform in Ubuntu using Open Source Software and Docker!
+This Repo is a guide to setting up a Data Platform in Ubuntu using Open Source Software in Docker.
 
-![Open Source Data Analytics Platform ](https://github.com/DataCraftsmanAU/moderndatastack/blob/main/Open%20Source%20Data%20Analytics%20Platform.png)
+![Open Data Platform ](https://github.com/DataCraftsmanAU/moderndatastack/blob/main/Open%20Data%20Platform.png)
 
 ## Out of Scope - TLS/HTTPS
 Setting up using TLS and certificates adds a massive complexity to the install however it is possible. Generally you need to get some certificates made up for your server, put them someone safe in your home drive, then mount them to various locations on each application using -v /directory:/app/cert/dir and usually an -e TLSOPTION=true type environment variable.
 
 
 ## Docker Modern Data stack
-## Installation
-
+## Data Platform
 Most of the content below are direct commands to run in the linux terminal. Just check each one before you run them in case there are passwords to enter or something. Also where ever you see `localhost`, usually I mean to use your VMs address. E.G. `192.168.1.X` or `yourvmdomain.com`
 
 Make your life easier:
@@ -97,7 +96,7 @@ Use http://localhost:9000 for as your S3 Host address.
 ```
 mkdir airflow
 cd airflow
-curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.9.1/docker-compose.yaml'
+curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.10.2/docker-compose.yaml'
 mkdir -p ./dags ./logs ./plugins ./config 
 ```
 #### Create .env file and add environment variables
@@ -155,12 +154,10 @@ docker compose up -d
 docker compose down --volumes --rmi all
 ```
 
-
 ### Install Postgres
 ```
-docker run -d --name postgres-warehouse -e POSTGRES_USER=<username> -e POSTGRES_PASSWORD=<password> -e PGDATA=/var/lib/postgresql/data/pgdata -v postgres_data:/var/lib/postgresql/data -p 31250:5432 postgres:16.3
+docker run -d --name postgres-warehouse -e POSTGRES_USER=<username> -e POSTGRES_PASSWORD=<password> -e PGDATA=/var/lib/postgresql/data/pgdata -v postgres_data:/var/lib/postgresql/data -p 31250:5432 postgres:17.0
 ```
-
 
 #### Install pgadmin
 ```
@@ -171,32 +168,12 @@ Login at http://localhost:31280, usually takes a minute to boot.
 Register your new postgres server to the pgadmin server list.
 
 
-
-### Install Airbyte
-Go back to your linux home directory and run this:
-```
-git clone https://github.com/airbytehq/airbyte.git
-cd airbyte
-./run-ab-platform.sh
-```
-
-#### Once you are happy it works, run Airbyte in background
-```
-nohup ./run-ab-platform.sh >> nohup.out &
-```
-http://localhost:8000
-Default account = airbyte / password
-Create an account with Email and Company
-
-
 ### Install Jupyterspark
-
+docker run -d -p 8888:8888 --name jupyter-spark -v jupyter_spark_data:/home/jovyan/work quay.io/jupyter/all-spark-notebook:latest
 
 
 ### Business Intelligence / Dashboard Tools
 I personally recommend paying for Tableau since your users will be interfacing with this part of the stack and it's just objectively good. Superset and Lightdash are both great Open Source tools if you are just using it internally or for yourself. I have played around with several other tools but none are as good as these. If you want something just on your desktop, another option is installing PowerBI Desktop through the Windows Store and just connect to your postgres database. I do this for my jobscraper tool. If you are really unsure you can setup a Semantic Layer using cube.js and just decide later, but I've never done this so I can't recommend it.
-
-
 
 ### Install Apache Superset
 ```
@@ -216,7 +193,6 @@ docker exec -it superset superset load_examples
 docker exec -it superset superset init
 ```
 
-
 ### Install Lightdash
 ```
 git clone https://github.com/lightdash/lightdash
@@ -227,37 +203,59 @@ docker-compose -f docker-compose.yml --env-file .env up --detach --remove-orphan
 ```
 
 
+## DEVOPS/SRE
 ### Install Logging and Monitoring
+https://dev.to/chafroudtarek/part-1-how-to-set-up-grafana-and-prometheus-using-docker-i47
+Copy the monitoring folder to the server.
 ```
-git clone https://github.com/vegasbrianc/prometheus/
-cd prometheus
-docker compose up
+docker compose up -d
 ```
 
+login to grafana with admin/admin
+Change password.
+Add the promethus server as a data source.
+Add the monitoring jsons as dashboards, ensuring the data source is selected.
+
+### Updating docker images
+#### watchtower - WARNING
+This automatically updates all your images. Pretty dangerous, only use if you know what you're doing.
+```
+docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower
+```
+If you want to select certain images to update regularly (every 30secs), like ml models or dbt docs.
+docker run -d --name watchtower -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower --interval 30 mlmodel dbtdocs containername
 
 
-## Retrieval Augmented Generation (RAG)
+## MLOPS
+### MLFlow
+#### Tracking Server Database
+```
+docker run -d --name mlflow-db -e POSTGRES_USER=<user> -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=mlflowdb -e PGDATA=/var/lib/postgresql/data/pgdata -v mlflow_data:/var/lib/postgresql/data -p 31251:5432 postgres:17.0
+```
+
+#### Tracking Server Database
+```
+docker run -d --name mlflow -p 5002:5000 -e MLFLOW_S3_ENDPOINT_URL=http://localhost:9000 -e AWS_ACCESS_KEY_ID=<create in minio> -e AWS_SECRET_ACCESS_KEY=<create in minio> --entrypoint /bin/sh ghcr.io/mlflow/mlflow -c "pip install psycopg2-binary boto3 && mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri postgresql://<user>:<password>@localhost:31251/mlflowdb --artifacts-destination s3://mlartifacts"
+```
+#### Connecting to Tracking Server
+See the mlflow.ipynb
+
+#### Serving Models
+Similar to the tracking database but you will need to create a dockerfile, select the model from s3 and run mlflow models serve. See their docs.
+
+
+## AI / Retrieval Augmented Generation (RAG)
 ### PGVector
 ### Ollama
-### LangChain/
+### Open WebUi
+### LangChain
 
 
 ## Lakehouse
 ### Hudi
-### Spark
 ### Trino
-
 
 ## Streaming
 ### Pulsar
 ### Apache Druid
 ### Apache Flink
-
-
-## MLOPS
-### ClearML
-### DVC
-
-
-## HTAP
-### TiDB
