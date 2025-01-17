@@ -1,4 +1,5 @@
 # Open Data Platform
+This repo has been moved to my business repo. See https://github.com/DataCraftsmanAustralia/open-data-platform for updated content.
 
 This Repo is a guide to setting up a Data Platform in Ubuntu using Open Source Software in Docker.
 
